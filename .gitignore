@@ -1,2 +1,10 @@
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-*
+*.code-workspace
+*.DS_Store
+Thumbs.db
 /graphs
 model.txt
