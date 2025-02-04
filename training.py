@@ -10,12 +10,19 @@ NUM_ITERATIONS = 10000
 def load_data(filename):
     kms = []
     prices = []
-    with open(filename, 'r') as csvfile:
-        reader = csv.DictReader(csvfile)
-        for row in reader:
-            kms.append(float(row['km']))
-            prices.append(float(row['price']))
-    return np.array(kms), np.array(prices)
+    try:
+        with open(filename, 'r') as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                kms.append(float(row['km']))
+                prices.append(float(row['price']))
+        return np.array(kms), np.array(prices)
+    except FileNotFoundError:
+        print(f"Error: {filename} not found")
+        exit()
+    except PermissionError:
+        print(f"Error: Permission denied to open {filename}")
+        exit()
 
 def normalize_data(data):
     mean = np.mean(data)
@@ -52,10 +59,14 @@ def gradient_descent(kms, prices, theta0, theta1, learning_rate, iterations):
 
     return theta0, theta1, cost_history
 
-def save_model(theta0, theta1, km_mean, km_std, filename="data/model.txt"):
-    with open(filename, 'w') as f:
-        f.write(f"{theta0}\n{theta1}\n{km_mean}\n{km_std}\n")
-    print(f"Model and normalization parameters saved to {filename}")
+def save_model(theta0, theta1, km_mean, km_std, filename):
+    try:
+        with open(filename, 'w') as f:
+            f.write(f"{theta0}\n{theta1}\n{km_mean}\n{km_std}\n")
+        print(f"Model and normalization parameters saved to {filename}")
+    except PermissionError:
+        print(f"Error: Permission denied to save {filename}")
+        return
 
 def plot_results(kms, prices, theta0, theta1, km_mean, km_std, cost_history):
     os.makedirs('graphs', exist_ok=True)
@@ -109,7 +120,7 @@ def main():
     theta0, theta1, cost_history = gradient_descent(kms_normalized, prices, theta0, theta1, LEARNING_RATE, NUM_ITERATIONS)
 
     # Save the model parameters
-    save_model(theta0, theta1, km_mean, km_std)
+    save_model(theta0, theta1, km_mean, km_std, "data/model.txt")
 
     plot_results(kms, prices, theta0, theta1, km_mean, km_std, cost_history)
 

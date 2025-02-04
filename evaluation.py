@@ -4,21 +4,35 @@ import numpy as np
 def load_data(filename):
     kms = []
     prices = []
-    with open(filename, 'r') as csvfile:
-        reader = csv.DictReader(csvfile)
-        for row in reader:
-            kms.append(float(row['km']))
-            prices.append(float(row['price']))
-    return np.array(kms), np.array(prices)
+    try:
+        with open(filename, 'r') as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                kms.append(float(row['km']))
+                prices.append(float(row['price']))
+        return np.array(kms), np.array(prices)
+    except FileNotFoundError:
+        print(f"Error: {filename} not found")
+        exit()
+    except PermissionError:
+        print(f"Error: Permission denied to open {filename}")
+        exit()
 
-def load_model(filename="data/model.txt"):
-    with open(filename, 'r') as f:
-        lines = f.readlines()
-        theta0 = float(lines[0].strip())
-        theta1 = float(lines[1].strip())
-        km_mean = float(lines[2].strip())
-        km_std = float(lines[3].strip())
-    return theta0, theta1, km_mean, km_std
+def load_model(filename):
+    try:
+        with open(filename, 'r') as f:
+            lines = f.readlines()
+            theta0 = float(lines[0].strip())
+            theta1 = float(lines[1].strip())
+            km_mean = float(lines[2].strip())
+            km_std = float(lines[3].strip())
+        return theta0, theta1, km_mean, km_std
+    except FileNotFoundError:
+        print(f"Error: {filename} not found")
+        exit()
+    except PermissionError:
+        print(f"Error: Permission denied to open {filename}")
+        exit()
 
 def predict_price(km, theta0, theta1, km_mean, km_std):
     km_normalized = (km - km_mean) / km_std
@@ -43,12 +57,8 @@ def compute_metrics(actual, predicted):
 
 def main():
     # Load data and model
-    try:
-        kms, prices = load_data("data/data.csv")
-        theta0, theta1, km_mean, km_std = load_model()
-    except FileNotFoundError as e:
-        print(f"Error: {e}")
-        return
+    kms, prices = load_data("data/data.csv")
+    theta0, theta1, km_mean, km_std = load_model("data/model.txt")
 
     # Generate predictions
     predictions = np.array([predict_price(km, theta0, theta1, km_mean, km_std) for km in kms])

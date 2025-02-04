@@ -1,11 +1,18 @@
-def load_model(filename="data/model.txt"):
-    with open(filename, 'r') as f:
-        lines = f.readlines()
-        theta0 = float(lines[0].strip())
-        theta1 = float(lines[1].strip())
-        km_mean = float(lines[2].strip())
-        km_std = float(lines[3].strip())
-    return theta0, theta1, km_mean, km_std
+def load_model(filename):
+    try:
+        with open(filename, 'r') as f:
+            lines = f.readlines()
+            theta0 = float(lines[0].strip())
+            theta1 = float(lines[1].strip())
+            km_mean = float(lines[2].strip())
+            km_std = float(lines[3].strip())
+        return theta0, theta1, km_mean, km_std
+    except FileNotFoundError:
+        print(f"Error: {filename} not found")
+        exit()
+    except PermissionError:
+        print(f"Error: Permission denied to open {filename}")
+        exit()
 
 def predict_price(km, theta0, theta1, km_mean, km_std):
     # Normalize the km value before prediction
@@ -13,7 +20,7 @@ def predict_price(km, theta0, theta1, km_mean, km_std):
     return theta0 + theta1 * km_normalized
 
 def main():
-    theta0, theta1, km_mean, km_std = load_model()
+    theta0, theta1, km_mean, km_std = load_model("data/model.txt")
 
     try:
         km = float(input("Enter the car's km: "))
